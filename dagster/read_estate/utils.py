@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Utility helpers shared by several assets."""
 import pandas as pd
 
