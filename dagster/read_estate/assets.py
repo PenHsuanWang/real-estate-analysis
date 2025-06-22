@@ -4,6 +4,7 @@ import pandas as pd
 from dagster import (
     AssetExecutionContext,
     AssetIn,
+    AssetOut,
     MetadataValue,
     asset,
     multi_asset,
@@ -85,8 +86,8 @@ def enriched_transactions(filtered_transactions: pd.DataFrame) -> pd.DataFrame:
 # ───────────────── 4. Lightweight analytics as multi-asset ─────────────────
 @multi_asset(
     outs={
-        "tx_counts":           {"metadata": {"kind": "summary"}},
-        "avg_price_per_month": {"metadata": {"kind": "kpi"}},
+        "tx_counts": AssetOut(metadata={"kind": "summary"}),
+        "avg_price_per_month": AssetOut(metadata={"kind": "kpi"}),
     },
     ins={"enriched_transactions": AssetIn()},
 )
