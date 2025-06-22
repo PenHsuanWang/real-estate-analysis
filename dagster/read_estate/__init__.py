@@ -10,8 +10,7 @@ from .assets import (
     raw_transactions,
     filtered_transactions,
     enriched_transactions,
-    tx_counts,
-    avg_price_per_month,
+    _analytics,
     price_per_ping_plot,
 )
 from .resources import CsvPathResource
@@ -21,8 +20,7 @@ defs = Definitions(
         raw_transactions,
         filtered_transactions,
         enriched_transactions,
-        tx_counts,
-        avg_price_per_month,
+        _analytics,
         price_per_ping_plot,   # the image-producing asset
     ],
     resources={
