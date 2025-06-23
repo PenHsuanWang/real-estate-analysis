@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 import pandas as pd
 from dagster import (
     AssetExecutionContext,
+    AssetCheckExecutionContext,
     AssetCheckResult,
     asset_check,
 )
@@ -16,7 +15,7 @@ from dagster import (
     description="price_per_ping 必須為正值且不可為 NaN"
 )
 def check_price_positive(
-    context: AssetExecutionContext,
+    context: AssetCheckExecutionContext,
     enriched_transactions: pd.DataFrame,
 ) -> AssetCheckResult:
     bad = (enriched_transactions["price_per_ping"] <= 0) | (
@@ -43,7 +42,7 @@ def check_price_positive(
     description="最近一筆交易日期必須在 45 天內"
 )
 def check_freshness(
-    context: AssetExecutionContext,
+    context: AssetCheckExecutionContext,
     enriched_transactions: pd.DataFrame,
 ) -> AssetCheckResult:
     most_recent = enriched_transactions["transaction_date"].max()
