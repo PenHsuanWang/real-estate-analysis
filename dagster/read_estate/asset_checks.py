@@ -46,7 +46,9 @@ def check_freshness(
     enriched_transactions: pd.DataFrame,
 ) -> AssetCheckResult:
     most_recent = enriched_transactions["transaction_date"].max()
-    days_since = (pd.Timestamp.utcnow().normalize() - most_recent).days
+    now = pd.Timestamp.utcnow().normalize().tz_localize(None)
+    recent = most_recent.tz_localize(None)
+    days_since = (now - recent).days
     passed = days_since <= 45
 
     return AssetCheckResult(
