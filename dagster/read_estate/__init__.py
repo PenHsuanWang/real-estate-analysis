@@ -13,6 +13,7 @@ from .assets import (
     _analytics,
     price_per_ping_plot,
 )
+from .asset_checks import check_price_positive, check_freshness
 from .resources import CsvPathResource
 
 defs = Definitions(
@@ -22,6 +23,10 @@ defs = Definitions(
         enriched_transactions,
         _analytics,
         price_per_ping_plot,   # the image-producing asset
+    ],
+    asset_checks=[
+        check_price_positive,
+        check_freshness,
     ],
     resources={
         # 👇 update to the real path of your CSV
