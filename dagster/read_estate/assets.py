@@ -5,6 +5,7 @@ from dagster import (
     AssetExecutionContext,
     AssetIn,
     AssetOut,
+    Output,
     MetadataValue,
     asset,
     multi_asset,
@@ -110,10 +111,8 @@ def _analytics(enriched_transactions: pd.DataFrame):
         .sort_index()
     )
 
-    return {
-        "tx_counts": tx_counts,
-        "avg_price_per_month": avg_price,
-    }
+    yield Output(tx_counts, output_name="tx_counts")
+    yield Output(avg_price, output_name="avg_price_per_month")
 
 
 # ───────────────── 5. Matplotlib plot as a first-class asset ───────────────
