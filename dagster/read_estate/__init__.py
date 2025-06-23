@@ -13,6 +13,7 @@ from .assets import (
     _analytics,
     price_per_ping_plot,
 )
+from .assets_viz import analysis_plots
 from .asset_checks import check_price_positive, check_freshness
 from .resources import CsvPathResource
 
@@ -23,6 +24,7 @@ defs = Definitions(
         enriched_transactions,
         _analytics,
         price_per_ping_plot,   # the image-producing asset
+        analysis_plots,
     ],
     asset_checks=[
         check_price_positive,
