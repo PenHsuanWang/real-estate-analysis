@@ -110,8 +110,10 @@ def _analytics(enriched_transactions: pd.DataFrame):
         .sort_index()
     )
 
-    yield tx_counts
-    yield avg_price
+    return {
+        "tx_counts": tx_counts,
+        "avg_price_per_month": avg_price,
+    }
 
 
 # ───────────────── 5. Matplotlib plot as a first-class asset ───────────────
