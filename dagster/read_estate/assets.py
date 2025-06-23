@@ -1,4 +1,5 @@
 """All ETL logic expressed as Dagster software-defined assets (SDAs)."""
+import os
 import matplotlib.pyplot as plt
 import pandas as pd
 from dagster import (
@@ -127,6 +128,9 @@ def price_per_ping_plot(
     ax.grid(True)
 
     plot_path = "dagster_artifacts/avg_price.png"
+    plot_dir = os.path.dirname(plot_path)
+    if plot_dir and not os.path.exists(plot_dir):
+        os.makedirs(plot_dir, exist_ok=True)
     fig.savefig(plot_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
 
