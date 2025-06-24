@@ -2,6 +2,8 @@ from dagster import asset, AssetExecutionContext, AssetIn, MetadataValue
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+
 
 @asset(ins={"avg_price_per_month": AssetIn()})
 def price_per_ping_plot(context: AssetExecutionContext, avg_price_per_month):
@@ -48,7 +50,9 @@ def analysis_plots(context: AssetExecutionContext, enriched_transactions):
 
     # --- Building age histogram ---------------------------------------------
     fig, ax = plt.subplots(figsize=(12, 6))
-    df["building_age"].dropna().hist(bins=range(-5, 51), edgecolor="black", color="skyblue", ax=ax)
+    df["building_age"].dropna().hist(
+        bins=range(-5, 51), edgecolor="black", color="skyblue", ax=ax
+    )
     ax.set_title("Distribution of Building Ages at Time of Transaction")
     ax.set_xlabel("Building Age (Years)")
     ax.set_ylabel("Number of Transactions")
@@ -102,7 +106,9 @@ def analysis_plots(context: AssetExecutionContext, enriched_transactions):
 
     fig, ax1 = plt.subplots(figsize=(15, 6))
     tx_counts.index = tx_counts.index.astype(str)
-    ax1.bar(tx_counts.index, tx_counts.values, color="b", alpha=0.5, label="Transactions")
+    ax1.bar(
+        tx_counts.index, tx_counts.values, color="b", alpha=0.5, label="Transactions"
+    )
     ax1.set_xlabel("Year-Month")
     ax1.set_ylabel("Number of Transactions", color="b")
     ax2 = ax1.twinx()
@@ -155,5 +161,83 @@ def analysis_plots(context: AssetExecutionContext, enriched_transactions):
     fig.savefig(path_ratio_box, dpi=150, bbox_inches="tight")
     plt.close(fig)
     metadata["area_ratio_box_plot"] = MetadataValue.path(path_ratio_box)
+
+    context.add_output_metadata(metadata)
+
+
+@asset(ins={"enriched_transactions": AssetIn()})
+def enhanced_area_ratio_plots(
+    context: AssetExecutionContext, enriched_transactions: pd.DataFrame
+):
+    """Generate Seaborn-based area ratio plots and save them as PNG files."""
+    df = enriched_transactions.copy()
+    plot_dir = "dagster_artifacts"
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir, exist_ok=True)
+
+    area_cols = {
+        "main_building_area_ping": "Main Building",
+        "auxiliary_building_area_ping": "Auxiliary Building",
+        "balcony_area_ping": "Balcony",
+        "parking_area_ping": "Parking",
+        "public_facility_ratio": "Public Facility",
+    }
+    area_ratio_df = df[list(area_cols.keys())].rename(columns=area_cols)
+
+    metadata: dict[str, MetadataValue] = {}
+
+    # --- Boxplot -----------------------------------------------------------
+    plt.figure(figsize=(14, 7))
+    sns.boxplot(data=area_ratio_df, palette="pastel")
+    plt.title("Boxplot of Area Ratios")
+    plt.ylabel("Ratio")
+    plt.xlabel("Area Type")
+    plt.grid(True)
+    box_path = os.path.join(plot_dir, "area_ratio_box_enhanced.png")
+    plt.savefig(box_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    metadata["area_ratio_boxplot"] = MetadataValue.path(box_path)
+
+    # --- Violin plot -------------------------------------------------------
+    plt.figure(figsize=(14, 7))
+    sns.violinplot(data=area_ratio_df, palette="Set3")
+    plt.title("Violin Plot of Area Ratios")
+    plt.ylabel("Ratio")
+    plt.xlabel("Area Type")
+    plt.grid(True)
+    violin_path = os.path.join(plot_dir, "area_ratio_violin.png")
+    plt.savefig(violin_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    metadata["area_ratio_violin"] = MetadataValue.path(violin_path)
+
+    # --- Stacked bar chart -------------------------------------------------
+    sample_size = min(100, len(area_ratio_df))
+    sample_df = area_ratio_df.sample(sample_size, random_state=42)
+    plt.figure(figsize=(15, 6))
+    sample_df.plot(kind="bar", stacked=True, colormap="viridis")
+    plt.title("Stacked Bar Chart of Area Ratios (Sample Data)")
+    plt.xlabel("Sample Transaction Index")
+    plt.ylabel("Ratio")
+    plt.legend(loc="upper right")
+    plt.tight_layout()
+    stacked_path = os.path.join(plot_dir, "area_ratio_stacked_bar.png")
+    plt.savefig(stacked_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    metadata["area_ratio_stacked_bar"] = MetadataValue.path(stacked_path)
+
+    # --- Colored barplot of averages --------------------------------------
+    avg_ratios = area_ratio_df.mean().reset_index()
+    avg_ratios.columns = ["Area Type", "Average Ratio"]
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x="Area Type", y="Average Ratio", data=avg_ratios, palette="coolwarm")
+    plt.title("Average Area Ratios Across All Transactions")
+    plt.xlabel("Area Type")
+    plt.ylabel("Average Ratio")
+    plt.ylim(0, 1)
+    plt.tight_layout()
+    avg_path = os.path.join(plot_dir, "area_ratio_avg_colored.png")
+    plt.savefig(avg_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    metadata["area_ratio_avg_colored"] = MetadataValue.path(avg_path)
 
     context.add_output_metadata(metadata)
