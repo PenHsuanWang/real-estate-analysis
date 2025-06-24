@@ -3,6 +3,7 @@
 `defs` is the only object Dagster looks for; everything else
 is imported here so Dagit can render the asset graph.
 """
+
 from dagster import Definitions
 
 # ─── bring assets & resources into scope ───
@@ -13,7 +14,7 @@ from .assets import (
     _analytics,
     price_per_ping_plot,
 )
-from .assets_viz import analysis_plots
+from .assets_viz import analysis_plots, enhanced_area_ratio_plots
 from .asset_checks import check_price_positive, check_freshness
 from .resources import CsvPathResource
 
@@ -23,8 +24,9 @@ defs = Definitions(
         filtered_transactions,
         enriched_transactions,
         _analytics,
-        price_per_ping_plot,   # the image-producing asset
+        price_per_ping_plot,  # the image-producing asset
         analysis_plots,
+        enhanced_area_ratio_plots,
     ],
     asset_checks=[
         check_price_positive,
